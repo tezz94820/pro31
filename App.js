@@ -8,20 +8,13 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Home from './components/Home';
 import Categories from './components/Categories';
 import Favourites from './components/Favourites';
-import {NativeBaseProvider} from "native-base";
+import {IconButton, NativeBaseProvider} from "native-base";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
-firestore()
-  .collection('Users')
-  .add({
-    name: 'Ada Lovelace',
-    age: 30,
-  })
-  .then(() => {
-    console.log('User added!');
-  });
+import HomePage from './components/StackScreens/HomePage';
+import SingleImage from './components/SingleImage';
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
 const App = () => {
 
@@ -32,29 +25,12 @@ const App = () => {
   return (
     <NativeBaseProvider>
       <NavigationContainer>
-        <Tab.Navigator>
-          <Tab.Screen name="Home" component={Home}
-          options={{
-            tabBarLabel: 'Home',
-            tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="home" color={color} size={size} />
-            ),
-        }}/>
-          <Tab.Screen name="Categories" component={Categories} 
-          options={{
-            tabBarLabel: 'Categories',
-            tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="magnify" color={color} size={size} />
-            ),
-          }}/>
-          <Tab.Screen name="Favourites" component={Favourites} 
-          options={{
-            tabBarLabel: 'Favourites',
-            tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="heart" color={color} size={size} />
-            ),
-          }}/>
-        </Tab.Navigator>
+        <Stack.Navigator screenOptions={{
+          headerShown:false
+        }} initialRouteName="HomePage">
+          <Stack.Screen name="HomePage" component={HomePage} />
+          <Stack.Screen name="SingleImage" component={SingleImage} />
+        </Stack.Navigator>
       </NavigationContainer>
     </NativeBaseProvider>
   );

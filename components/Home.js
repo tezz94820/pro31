@@ -2,50 +2,27 @@ import {Box} from 'native-base';
 import React, { useEffect, useState } from 'react';
 import {FlatList, Image, StyleSheet, Text, View} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import Recent from './HomeComponents/Recent';
+import Random from './HomeComponents/Random';
+import Popular from './HomeComponents/Popular';
+import { Title } from 'react-native-paper';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+
+const Tab = createMaterialTopTabNavigator()
 
 function Home(){
-
-  const [links,setLinks] = useState([])
-  const [name,setName] = useState('')
-  
-  const getData = async () => {
-    const data = await firestore().collection('Actress').doc('rVDZ6MNnVGah9aDijS6v').get();
-    // console.log(data._data)
-    setName(data._data.name)
-    setLinks(data._data.links)
-  }
-  
-  useEffect(() => {
-    getData()
-  }, []);
-
-  console.log(name)
-  console.log(links[0])
-
   return (
-    <Box flex={1} bg="#fff" alignItems="center" justifyContent="center" >
-      <Text>Home Screen</Text>
-        <FlatList data={links}
-          renderItem={({item}) => <Image source={{uri:item.url}} style = {{ width: 200, height: 200 }}/>}
-        />
-        
-        {/* <Text></Text> */}
-      {/* <FlatList
-        data={[
-          {key: 'Devin'},
-          {key: 'Dan'},
-          {key: 'Dominic'},
-          {key: 'Jackson'},
-          {key: 'James'},
-          {key: 'Joel'},
-          {key: 'John'},
-          {key: 'Jillian'},
-          {key: 'Jimmy'},
-          {key: 'Julie'},
-        ]}
-        renderItem={({item}) => <Text style={styles.item}>{item.key}</Text>}
-      /> */}
-    </Box>
+      <Tab.Navigator screenOptions={{
+        tabBarLabelStyle: { color:'#fff' },
+        // tabBarItemStyle: { width: 100 },
+        tabBarStyle: { backgroundColor: '#000000' },
+      }}>
+        <Tab.Screen name="Recent" component={Recent} />
+        <Tab.Screen name="Random" component={Random} />
+        <Tab.Screen name="Popular" component={Popular}/>
+      </Tab.Navigator>
   );
 }
 const styles = StyleSheet.create({
