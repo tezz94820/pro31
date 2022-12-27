@@ -1,10 +1,10 @@
 import {Box} from 'native-base';
 import React, { useEffect, useState } from 'react';
-import {FlatList, Image, StyleSheet, Text, View} from 'react-native';
+import {FlatList, Image, StyleSheet, TouchableOpacity, View} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import { ActivityIndicator } from 'react-native';
 
-function Recent() {
+function Recent({navigation}) {
   //states
   const [images, setImages] = useState([])
   const [loading, setLoading] = useState(true);
@@ -25,6 +25,13 @@ function Recent() {
     })
   }
 
+  //Image Pressed Function
+  const onPress = (key,name) => {
+    // console.log("Image Pressed")
+    // console.log(key,name)
+    navigation.navigate('SingleImage',{key,name,images})
+  }
+
   useEffect(() => {
     getData()
     return () => getData();
@@ -36,10 +43,14 @@ function Recent() {
 
   return (
     <View style={styles.container} >
+      {/* <TouchableOpacity><Image source={{uri:item.url}} style ={styles.image} /></TouchableOpacity> */}
       {/* <Text>Hello</Text> */}
           <FlatList
             data={images}
-            renderItem={({item}) => <Image source={{uri:item.url}} style ={styles.image} />}
+            renderItem={({item}) => 
+            <TouchableOpacity onPress={() => onPress(item.key,item.name)} style={styles.ImageTouchable} activeOpacity={0.8}>
+              <Image source={{uri:item.url}} style ={styles.image} />
+            </TouchableOpacity>}
             numColumns={2}
             keyExtractor={(item) => item.key}
             resizeMode="contain"
@@ -56,17 +67,24 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   image:{
-    width:'49%',
-    height:330,
+    width:'100%',
+    height:'100%',
     borderWidth:5,
-    borderColor:"#000000",
+    // borderColor:"#000000",
     borderRadius:20,
-    overlayColor:'black'
+    overlayColor:'black',
+    margin:5,
   },
   container:{
     alignItems:"center",
     justifyContent:"center",
     backgroundColor:"#000000",
+  },
+  ImageTouchable:{
+    height:330,
+    width:"49%",
+    backgroundColor: '#000000',
+    
   }
 });
 

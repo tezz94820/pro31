@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import {StyleSheet, Text, View, FlatList, Image, ImageBackground, StatusBar, TouchableWithoutFeedback} from 'react-native';
+import {StyleSheet, Text, View, FlatList, Image, ImageBackground, StatusBar, TouchableWithoutFeedback, Button, TouchableOpacity} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
+import changeNavigationBarColor, { hideNavigationBar, showNavigationBar } from 'react-native-navigation-bar-color';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 function SingleImage({route,navigation}) {
   const {key,name,images} = route.params
@@ -28,17 +30,34 @@ function SingleImage({route,navigation}) {
   //   return () => getData();
   // }, []);
 
+
+  const onImageClicked = () => {
+    setImageClicked(!imageClicked)
+  }
+  imageClicked ? hideNavigationBar() : showNavigationBar();
     return (
       <View>
-        <StatusBar translucent backgroundColor="transparent" hidden={!imageClicked}/>
+        <StatusBar translucent backgroundColor="transparent"/>
         <FlatList
           horizontal={true}
           data={images}
           initialScrollIndex={images.findIndex( item => item.key === key)}
           renderItem={({item}) => 
-            <TouchableWithoutFeedback onPress={() => setImageClicked(!imageClicked)}>
+            <TouchableWithoutFeedback onPress={() => onImageClicked()}>
               <ImageBackground source={{uri:item.url}} style ={styles.image} >
-                <Text>Hello</Text>
+                {
+                !imageClicked ? 
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity>
+                    <MaterialCommunityIcons name="information" size={50} color="#ffffff" />
+                    <Text style={styles.iconLabels}>Info</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity>
+                    <MaterialCommunityIcons name="heart" size={50} color="#ffffff"/>
+                    <Text style={styles.iconLabels}>Like</Text>
+                  </TouchableOpacity>
+                </View>
+                :null}
               </ImageBackground> 
             </TouchableWithoutFeedback>
           }
@@ -54,12 +73,9 @@ function SingleImage({route,navigation}) {
 }
 
 const styles = StyleSheet.create({
-  text: {
-    color: 'black',
-  },
   image:{
     width:410,
-    height:850,
+    height:900,
     // resizeMode:"contain",
     // borderWidth:5,
     // borderColor:"#000000",
@@ -73,6 +89,24 @@ const styles = StyleSheet.create({
     justifyContent:"center",
     backgroundColor:"#000000",
   },
+  buttonContainer:{
+    height:100,
+    width:"93%",
+    position:"absolute",
+    bottom:"3.5%",
+    left:"3.5%",
+    flexDirection:"row",
+    justifyContent:"space-between",
+    backgroundColor:"rgba(154, 151, 156,0.8)",
+    // opacity:0.5,
+
+  },
+  iconLabels:{
+    color:"#000000",
+    fontSize:15,
+    left:10,
+    bottom:5,
+  }
 });
 
 export default SingleImage
