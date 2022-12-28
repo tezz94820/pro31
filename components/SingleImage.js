@@ -3,64 +3,20 @@ import {StyleSheet, Text, View, FlatList, Image, ImageBackground, StatusBar, Tou
 import firestore from '@react-native-firebase/firestore';
 import changeNavigationBarColor, { hideNavigationBar, showNavigationBar } from 'react-native-navigation-bar-color';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import BackgroundImage from './BackgroundImage';
 
 function SingleImage({route,navigation}) {
   const {key,name,images} = route.params
-  const [imageClicked,setImageClicked] = useState(false)
-  // const [image,setImage] = useState()
 
-  // const getData = () => {
-    // const data = firestore().collection('app').doc('Actress').collection(name).doc(key).get();
-    // console.log(data._data)
-    // data.onSnapshot( querySnapshot => {
-    //   const images =[]
-    //   querySnapshot.forEach(documentSnapshot => {
-    //     images.push({
-    //       ...documentSnapshot.data(),
-    //       key:documentSnapshot.id,
-    //     })
-    //   })
-    //   setImages(images)
-      // setLoading(false);
-    // })
-  // }
-
-  // useEffect(() => {
-  //   getData()
-  //   return () => getData();
-  // }, []);
-
-
-  const onImageClicked = () => {
-    setImageClicked(!imageClicked)
-  }
-  imageClicked ? hideNavigationBar() : showNavigationBar();
-    return (
+  return (
       <View>
         <StatusBar translucent backgroundColor="transparent"/>
         <FlatList
           horizontal={true}
           data={images}
           initialScrollIndex={images.findIndex( item => item.key === key)}
-          renderItem={({item}) => 
-            <TouchableWithoutFeedback onPress={() => onImageClicked()}>
-              <ImageBackground source={{uri:item.url}} style ={styles.image} >
-                {
-                !imageClicked ? 
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity>
-                    <MaterialCommunityIcons name="information" size={50} color="#ffffff" />
-                    <Text style={styles.iconLabels}>Info</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity>
-                    <MaterialCommunityIcons name="heart" size={50} color="#ffffff"/>
-                    <Text style={styles.iconLabels}>Like</Text>
-                  </TouchableOpacity>
-                </View>
-                :null}
-              </ImageBackground> 
-            </TouchableWithoutFeedback>
-          }
+          renderItem={({item}) => <BackgroundImage item={item}/> }
           keyExtractor={(item) => item.key}
           resizeMode="contain"
           pagingEnabled
@@ -90,22 +46,24 @@ const styles = StyleSheet.create({
     backgroundColor:"#000000",
   },
   buttonContainer:{
-    height:100,
+    height:90,
     width:"93%",
     position:"absolute",
-    bottom:"3.5%",
+    bottom:"4%",
     left:"3.5%",
     flexDirection:"row",
     justifyContent:"space-between",
-    backgroundColor:"rgba(154, 151, 156,0.8)",
+    backgroundColor:"rgba(0, 0, 0,1)",
+    borderRadius:30,
+    padding:5
     // opacity:0.5,
 
   },
   iconLabels:{
-    color:"#000000",
+    color:"#ffffff",
     fontSize:15,
     left:10,
-    bottom:5,
+    bottom:8,
   }
 });
 
