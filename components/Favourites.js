@@ -29,7 +29,8 @@ function Favourites({navigation}) {
 
   useEffect(() => {
     getFavourites()
-  },[images])
+    return () => getFavourites();
+  },[])
 
   return (
     <View style={styles.container} >

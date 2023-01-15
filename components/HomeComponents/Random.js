@@ -11,7 +11,7 @@ function Random({navigation}) {
 
   //useEffect dataFetching function from firebase
   const getData = () => {
-    const data = firestore().collection('app').doc('Actress').collection('Kriti Kharbanda');
+    const data = firestore().collection('app').doc('Actress').collection('Krithi Shetty');
     data.onSnapshot( querySnapshot => {
       const images =[]
       querySnapshot.forEach(documentSnapshot => {
@@ -73,7 +73,6 @@ const styles = StyleSheet.create({
     // borderColor:"#000000",
     borderRadius:20,
     overlayColor:'black',
-    margin:5,
   },
   container:{
     alignItems:"center",
@@ -84,7 +83,7 @@ const styles = StyleSheet.create({
     height:330,
     width:"49%",
     backgroundColor: '#000000',
-    
+    padding:5,
   }
 });
 

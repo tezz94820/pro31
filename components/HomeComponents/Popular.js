@@ -11,7 +11,7 @@ function Popular({navigation}) {
 
   //useEffect dataFetching function from firebase
   const getData = () => {
-    const data = firestore().collection('app').doc('Actress').collection('Kriti Kharbanda');
+    const data = firestore().collection('app').doc('Actress').collection('Ananya Panday');
     data.onSnapshot( querySnapshot => {
       const images =[]
       querySnapshot.forEach(documentSnapshot => {
@@ -48,7 +48,7 @@ function Popular({navigation}) {
           <FlatList
             data={images}
             renderItem={({item}) => 
-            <TouchableOpacity onPress={() => onPress(item.key,item.name)} style={styles.ImageTouchable} activeOpacity={0.8}>
+            <TouchableOpacity onPress={() => onPress(item.key,item.name)} style={styles.ImageTouchable} >
               <Image source={{uri:item.url}} style ={styles.image} />
             </TouchableOpacity>}
             numColumns={2}
@@ -63,9 +63,6 @@ function Popular({navigation}) {
 }
 
 const styles = StyleSheet.create({
-  text: {
-    color: 'black',
-  },
   image:{
     width:'100%',
     height:'100%',
@@ -73,7 +70,7 @@ const styles = StyleSheet.create({
     // borderColor:"#000000",
     borderRadius:20,
     overlayColor:'black',
-    margin:5,
+    // margin:5,
   },
   container:{
     alignItems:"center",
@@ -84,7 +81,7 @@ const styles = StyleSheet.create({
     height:330,
     width:"49%",
     backgroundColor: '#000000',
-    
+    padding:5,
   }
 });
 

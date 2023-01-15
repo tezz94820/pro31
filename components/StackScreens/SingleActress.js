@@ -4,14 +4,16 @@ import {FlatList, Image, StyleSheet, TouchableOpacity, View} from 'react-native'
 import firestore from '@react-native-firebase/firestore';
 import { ActivityIndicator } from 'react-native';
 
-function Recent({navigation}) {
+function SingleActress({navigation,route}) {
+  const {key,name} = route.params
+
   //states
   const [images, setImages] = useState([])
   const [loading, setLoading] = useState(true);
 
   //useEffect dataFetching function from firebase
   const getData = () => {
-    const data = firestore().collection('app').doc('Actress').collection('Kriti Kharbanda');
+    const data = firestore().collection('app').doc('Actress').collection(name);
     data.onSnapshot( querySnapshot => {
       const images =[]
       querySnapshot.forEach(documentSnapshot => {
@@ -27,8 +29,6 @@ function Recent({navigation}) {
 
   //Image Pressed Function
   const onPress = (key,name) => {
-    // console.log("Image Pressed")
-    // console.log(key,name)
     navigation.navigate('SingleImage',{key,name,images})
   }
 
@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
     // borderColor:"#000000",
     borderRadius:20,
     overlayColor:'black',
+    margin:5,
   },
   container:{
     alignItems:"center",
@@ -83,9 +84,8 @@ const styles = StyleSheet.create({
     height:330,
     width:"49%",
     backgroundColor: '#000000',
-    padding:5,
-
+    
   }
 });
 
-export default Recent
+export default SingleActress

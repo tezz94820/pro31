@@ -5,6 +5,8 @@ import changeNavigationBarColor, { hideNavigationBar, showNavigationBar } from '
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BackgroundImage from './BackgroundImage';
+import { Modal } from 'react-native';
+import ImageViewer from 'react-native-image-zoom-viewer';
 
 function SingleImage({route,navigation}) {
   const {key,name,images} = route.params
@@ -16,7 +18,7 @@ function SingleImage({route,navigation}) {
           horizontal={true}
           data={images}
           initialScrollIndex={images.findIndex( item => item.key === key)}
-          renderItem={({item}) => <BackgroundImage item={item}/> }
+          renderItem={({item}) => <BackgroundImage item={item} /> }
           keyExtractor={(item) => item.key}
           resizeMode="contain"
           pagingEnabled
@@ -25,6 +27,22 @@ function SingleImage({route,navigation}) {
           // ListFooterComponent={() => <View style={{height: 5}} />}
         />
       </View>
+      // <>
+      // <Text style={{color:'black'}}>Hello</Text>
+      //   <FlatList 
+      //   horizontal={true}
+      //   data={images}
+      //   initialScrollIndex={images.findIndex( item => item.key === key)}
+      //   renderItem={({item}) => 
+      //     <Image 
+      //     source={{uri:"https://firebasestorage.googleapis.com/v0/b/pro31-881ae.appspot.com/o/Kriti%20Kharbanda%2F1.jpg?alt=media&token=aaafbedf-af8e-4b32-872a-f19d78bf760f"}}
+      //     style={{height:100,width:100}}
+      //     />
+      //   }
+      //   pagingEnabled
+      //   />
+      //   <ImageViewer imageUrls={[{"url": "https://firebasestorage.googleapis.com/v0/b/pro31-881ae.appspot.com/o/Kriti%20Kharbanda%2F1.jpg?alt=media&token=aaafbedf-af8e-4b32-872a-f19d78bf760f"}]} />
+      // </>
     )
 }
 

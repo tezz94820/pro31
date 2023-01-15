@@ -12,6 +12,7 @@ import {IconButton, NativeBaseProvider} from "native-base";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import HomePage from './components/StackScreens/HomePage';
 import SingleImage from './components/SingleImage';
+import SingleActress from './components/StackScreens/SingleActress';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -25,11 +26,24 @@ const App = () => {
   return (
     <NativeBaseProvider>
       <NavigationContainer>
-        <Stack.Navigator screenOptions={{
-          headerShown:false
-        }} initialRouteName="HomePage">
-          <Stack.Screen name="HomePage" component={HomePage} />
-          <Stack.Screen name="SingleImage" component={SingleImage} />
+        <Stack.Navigator initialRouteName="HomePage" >
+          <Stack.Screen name="HomePage" component={HomePage} options={{headerShown:false}}/>
+          <Stack.Screen name="SingleImage" component={SingleImage} options={{headerShown:false}}/>
+          <Stack.Screen name="SingleActress" component={SingleActress} 
+            options={({route}) => ({
+              title: route.params.name,
+              headerShown:true,
+              headerStyle:{
+                backgroundColor:"#000000",
+                borderBottomWidth:3,
+                borderBottomColor:"#302f29",
+              },
+              headerTitleStyle:{
+                color:"#fff"
+              },
+              headerTintColor: '#ffffff'
+            })}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </NativeBaseProvider>

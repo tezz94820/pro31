@@ -4,11 +4,15 @@ import firestore from '@react-native-firebase/firestore';
 import changeNavigationBarColor, { hideNavigationBar, showNavigationBar } from 'react-native-navigation-bar-color';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import RNFetchBlob from 'rn-fetch-blob'
+import { Progress } from 'native-base';
 
 function BackgroundImage({item}) {
 
     const [imageClicked,setImageClicked] = useState(false)
     const [likedImage,SetLikedImage] = useState(false)
+    const [saveImageClicked,setSaveImageClicked] = useState(false)
+    const [downloadProgress,setDownloadProgress] = useState(0)
     const [favouritesDB,setFavouritesDB] = useState([])
     
     const getFavourites = async () => {
@@ -20,6 +24,7 @@ function BackgroundImage({item}) {
     
     useEffect(() => {
         getFavourites()
+        return () => getFavourites();
     },[])
 
     //like or unlike images
@@ -57,21 +62,61 @@ function BackgroundImage({item}) {
     imageClicked ? hideNavigationBar() : showNavigationBar();
     // console.log(favouritesDB)
 
+    const dirs = RNFetchBlob.fs.dirs
+    const saveImage = () => {
+      RNFetchBlob
+        .config({
+          // add this option that makes response data to be stored as a file,
+          // this is much more performant.
+          fileCache : true,
+          path : dirs.DCIMDir + `/Actress/${item.name}_${item.key}.png`,
+        })
+        .fetch('GET', item.url, {
+          //some headers ..
+        })
+        .progress({interval:1},(received, total) => {
+            // console.log('progress', received / total)
+            setDownloadProgress(received / total *100)
+          }
+        )
+        .then((res) => {
+          // the temp file path
+          console.log('The file saved to ', res.path())
+          setDownloadProgress(0)
+        })
+        .catch((errorMessage,statusCode)=>{
+          console.log("error with downloading file",errorMessage,statusCode)
+        })
+
+      setSaveImageClicked(true)
+    }
+  
+
+
   return (
         <TouchableWithoutFeedback onPress={() => onImageClicked()}>
             <ImageBackground source={{uri:item.url}} style ={styles.image} >
                 {
                 !imageClicked ? 
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity>
-                    <MaterialCommunityIcons name="information" size={50} color="#ffffff" />
-                    <Text style={styles.iconLabels}>Info</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => likeUnlikeImage(item.key,item.name,item.url)}>
-                    <MaterialCommunityIcons name="heart" size={50} color={likedImage?"#fc0341":"#ffffff"}/>
-                    <Text style={styles.iconLabels}>Like</Text>
-                  </TouchableOpacity>
-                </View>
+                // <View>
+                  <View style={styles.container}>
+                    {downloadProgress != 0 ? <Progress colorScheme="primary" value={downloadProgress} /> : null}
+                    <View style={styles.buttonContainer}>
+                      <TouchableOpacity>
+                        <MaterialCommunityIcons name="information" size={50} color="#ffffff" />
+                        <Text style={styles.iconLabels}>Info</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => saveImage(item.key,item.name,item.url)}>
+                        <MaterialCommunityIcons name="download" size={50} color={saveImageClicked?"#075fed":"#ffffff"}/>
+                        <Text style={styles.iconLabels}>Save</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => likeUnlikeImage(item.key,item.name,item.url)}>
+                        <MaterialCommunityIcons name="heart" size={50} color={likedImage?"#fc0341":"#ffffff"}/>
+                        <Text style={styles.iconLabels}>Like</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                // </View> 
                 :null
                 }
             </ImageBackground> 
@@ -90,11 +135,14 @@ const styles = StyleSheet.create({
       // overlayColor:'black',
     },
     container:{
-      height:"100%",
-      width:"100%",
-      alignItems:"center",
-      justifyContent:"center",
-      backgroundColor:"#000000",
+      height:120,
+      width:"93%",
+      position:"absolute",
+      bottom:"4%",
+      left:"3.5%",
+      flexDirection:"column",
+      justifyContent:"space-between",
+      // backgroundColor:"rgba(252, 3, 19,1)",
     },
     buttonContainer:{
       height:90,
