@@ -12,6 +12,7 @@ function BackgroundImage({item}) {
     const [imageClicked,setImageClicked] = useState(false)
     const [likedImage,SetLikedImage] = useState(false)
     const [saveImageClicked,setSaveImageClicked] = useState(false)
+    const [infoClicked,setInfoClicked] = useState(false)
     const [downloadProgress,setDownloadProgress] = useState(0)
     const [favouritesDB,setFavouritesDB] = useState([])
     
