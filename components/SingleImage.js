@@ -1,26 +1,26 @@
 import React, { useEffect, useState } from 'react'
-import {StyleSheet, Text, View, FlatList, Image, ImageBackground, StatusBar, TouchableWithoutFeedback, Button, TouchableOpacity} from 'react-native';
-import firestore from '@react-native-firebase/firestore';
-import changeNavigationBarColor, { hideNavigationBar, showNavigationBar } from 'react-native-navigation-bar-color';
+import {StyleSheet, Text, View, FlatList, Image, ImageBackground, StatusBar, TouchableWithoutFeedback, Button, TouchableOpacity,Pressable,Linking} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BackgroundImage from './BackgroundImage';
-import { Modal } from 'react-native';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import RNFetchBlob from 'rn-fetch-blob'
-import { Progress } from 'native-base';
+import { Box, CheckIcon, HStack, Progress, Radio, Slide, Spinner } from 'native-base';
+import { Divider } from 'native-base';
+import Modal from "react-native-modal";
+import WallpaperManager, {TYPE} from "react-native-wallpaper-manage";
 
 function SingleImage({route,navigation}) {
   const {key,name,images} = route.params
-  const [visible,setVisible] = useState(false)
-  const [currentItem,setCurrentItem] = useState('') 
+  const [currentItem,setCurrentItem] = useState('')
   const [imageClicked,setImageClicked] = useState(false)
   const [likedImage,SetLikedImage] = useState(false)
   const [saveImageClicked,setSaveImageClicked] = useState(false)
   const [downloadProgress,setDownloadProgress] = useState(0)
-  const [favouritesDB,setFavouritesDB] = useState([])
   const [infoClicked,setInfoClicked] = useState(false)
-
+  const [applyClicked,setApplyClicked] = useState(false)
+  const [wallpaperModalVisible,setWallpaperModalVisible] = useState(false)
+  const [wallpaperType,setWallpaperType] = useState('FLAG_SYSTEM')
+  const [slideVisible,setSlideVisible] = useState(false)
 
   const getFavourites = async () => {
     let data = JSON.parse(await AsyncStorage.getItem('@favourites'))
@@ -33,15 +33,11 @@ function SingleImage({route,navigation}) {
     }
   }
 
-  // useEffect(() => {
-  //   getFavourites()
-  //   return () => getFavourites();
-  // },[])
-
   const onImageRender = (currentIndex) => {
     changeCurrentItem(currentIndex)
     getFavourites()
   }
+
   const changeCurrentItem = (index) => {
     setCurrentItem(images[index])
   }
@@ -64,7 +60,7 @@ function SingleImage({route,navigation}) {
             data.push({key,name,url})
             await AsyncStorage.setItem('@favourites', JSON.stringify(data))
         // await AsyncStorage.removeItem('@favourites')
-        // console.log(await AsyncStorage.getAllKeys()) 
+        // console.log(await AsyncStorage.getAllKeys())
             // console.log(data)
         } catch (e) {
             // saving error
@@ -79,7 +75,6 @@ function SingleImage({route,navigation}) {
     }
     SetLikedImage(!likedImage)
   }
-
 
   const dirs = RNFetchBlob.fs.dirs
   const saveImage = () => {
@@ -102,7 +97,9 @@ function SingleImage({route,navigation}) {
       .then((res) => {
         // the temp file path
         console.log('The file saved to ', res.path())
-        setDownloadProgress(0)
+        setTimeout(() => {
+          setDownloadProgress(0)
+        }, 3000);
       })
       .catch((errorMessage,statusCode)=>{
         console.log("error with downloading file",errorMessage,statusCode)
@@ -114,38 +111,70 @@ function SingleImage({route,navigation}) {
   // console.log(images)
   const Viewerimages = [
     {"url": "https://firebasestorage.googleapis.com/v0/b/pro31-881ae.appspot.com/o/Kriti%20Kharbanda%2F1.jpg?alt=media&token=aaafbedf-af8e-4b32-872a-f19d78bf760f",key:"11"},
-    {"url": "https://firebasestorage.googleapis.com/v0/b/pro31-881ae.appspot.com/o/Kriti%20Kharbanda%2F1.jpg?alt=media&token=aaafbedf-af8e-4b32-872a-f19d78bf760f",key:"12"} 
+    {"url": "https://firebasestorage.googleapis.com/v0/b/pro31-881ae.appspot.com/o/Kriti%20Kharbanda%2F1.jpg?alt=media&token=aaafbedf-af8e-4b32-872a-f19d78bf760f",key:"12"}
   ]
 
-  const getImageInfo = () => {
+  const toggleModal = () => {
     setInfoClicked(!infoClicked)
-
   }
 
-  
+  const navigateByTag = () => {
+    navigation.push('SingleActress',{key:currentItem.key,name:currentItem.name}) 
+    setInfoClicked(false)
+  }
+
+  const linkOpener = async (type,typeUrl) => {
+    try {
+      await Linking.openURL(typeUrl)
+    } catch (error) {
+     console.log(error) 
+    }
+  }
+
+  const toggleWallpaperModal = () => {
+    setWallpaperModalVisible(true)
+  }
+
+  const applyWallpaper = (URL,type) => {
+    setApplyClicked(true)
+    setWallpaperModalVisible(false)
+    try {
+      const result = WallpaperManager.setWallpaper(URL, type==="FLAG_LOCK"?TYPE.FLAG_LOCK:TYPE.FLAG_SYSTEM)
+    } catch (error) {
+      console.log(error)
+    }
+    setTimeout(() => {
+      setApplyClicked(false)
+      setSlideVisible(true)
+      setTimeout(() => {
+        setSlideVisible(false)
+      }, 3000);
+    }, 2000);
+  }
+
   return (
       <>
-      {/* <Text style={{color:'black'}}>Hello</Text> */}
-        {/* <Modal visible={true} > */}
-        <ImageViewer 
-        enableSwipeDown
-        index={images.findIndex( item => item.key === key)}
-        onSwipeDown={() => navigation.goBack()}
-        renderHeader={(currentIndex) => <>{onImageRender(currentIndex)}</>}
-        onClick={() => setImageClicked(!imageClicked)}
-        onChange = {() => onImageChange()}
-        imageUrls={images}
+        <ImageViewer
+          enableSwipeDown
+          index={images.findIndex( item => item.key === key)}
+          onSwipeDown={() => navigation.goBack()}
+          renderHeader={(currentIndex) => <>{onImageRender(currentIndex)}</>}
+          onClick={() => setImageClicked(!imageClicked)}
+          onChange = {() => onImageChange()}
+          imageUrls={images}
         />
-        <Button title={currentItem.key+" "+infoClicked}></Button>
         {
-                !imageClicked ? 
-                // <View>
+                !imageClicked ?
                   <View style={styles.container}>
                     {downloadProgress != 0 ? <Progress colorScheme="primary" value={downloadProgress} /> : null}
                     <View style={styles.buttonContainer}>
-                      <TouchableOpacity onPress={() => getImageInfo()}>
-                        <MaterialCommunityIcons name="information" size={50} color={infoClicked?"#075fed":"#ffffff"} />
+                      <TouchableOpacity onPress={() => toggleModal()}>
+                        <MaterialCommunityIcons name="information" size={50} color="#ffffff" />
                         <Text style={styles.iconLabels}>Info</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => toggleWallpaperModal()}>
+                        <MaterialCommunityIcons name="format-paint" size={50} color={"#ffffff"} />
+                        <Text style={styles.iconLabels}>Apply</Text>
                       </TouchableOpacity>
                       <TouchableOpacity onPress={() => saveImage()}>
                         <MaterialCommunityIcons name="download" size={50} color={saveImageClicked?"#075fed":"#ffffff"}/>
@@ -157,10 +186,134 @@ function SingleImage({route,navigation}) {
                       </TouchableOpacity>
                     </View>
                   </View>
-                // </View> 
                 :null
+        }
+
+        {/* Modal Functionalities */}
+        
+          <Modal
+            isVisible={infoClicked}
+            onBackdropPress={() => setInfoClicked(false)}
+            onBackButtonPress={() => setInfoClicked(false)}
+            swipeDirection="down"
+            onSwipeComplete={() => toggleModal()}
+            animationIn="bounceInUp"
+            animationOut="bounceOutDown"
+            animationInTiming={250}
+            backdropTransitionInTiming={300}
+            // animationOutTiming={150}
+            // backdropTransitionOutTiming={500}
+            style={styles.modal}
+          >
+            <View style={styles.modalContent}>
+              <View style={styles.center}>
+                <TouchableOpacity><View style={styles.barIcon}/></TouchableOpacity>
+                <Text style={{fontSize:24}}>Info</Text>
+              </View>
+              <View style={styles.infoContainer}>
+                  <Text style={styles.text}>
+                    Name :
+                    <Text style={{color:"#115dad"}} onPress={() => navigateByTag()}>
+                      {` ${currentItem.name}`}
+                      </Text>
+                  </Text>
+                <Text style={styles.text}>Likes : {currentItem.likes?currentItem.likes:0}</Text>
+                {
+                  currentItem.dimensions ?
+                    <Text style={styles.text}>Dimensions : {currentItem.dimensions}</Text>
+                    : null
                 }
-        {/* </Modal> */}
+                <Divider orientation='horizontal' thickness="2" bg="#3246a8" style={{marginBottom:10}}/>
+                <Text style={styles.socialMediaHeading}>Social Media Handles</Text>
+                  {
+                    <FlatList 
+                    style={styles.socialMediaContainer}
+                    data={currentItem.social_media}
+                    keyExtractor={(item) => item.type}
+                    horizontal
+                    renderItem={({item}) =>
+                      <View style={{marginHorizontal:20}}>
+                        <TouchableOpacity onPress={async () => linkOpener(item.type,item.url)}>
+                          <MaterialCommunityIcons name={item.type} size={50} color={"#ffffff"}/>
+                        </TouchableOpacity>
+                      </View>
+                    }/>
+                  }
+              </View>
+            </View>
+          </Modal>
+
+          <Slide in={slideVisible} placement="top">
+            <Box w="100%" position="absolute" p="2" borderRadius="xs" bg="emerald.100" alignItems="center" justifyContent="center" 
+              _dark={{ bg: "emerald.200" }} safeArea>
+            <HStack space={2}>
+              <CheckIcon size="4" color="emerald.600" mt="1" _dark={{
+              color: "emerald.700"
+            }} />
+              <Text style={{color:"green",textAlign:"center"}}>
+                Wallpaper Applied Successfully
+              </Text>
+            </HStack>
+            </Box>
+          </Slide>
+
+          <Slide in={downloadProgress == 100} placement="top">
+            <Box w="100%" position="absolute" p="2" borderRadius="xs" bg="emerald.100" alignItems="center" justifyContent="center" 
+              _dark={{ bg: "emerald.200" }} safeArea>
+            <HStack space={2}>
+              <CheckIcon size="4" color="emerald.600" mt="1" _dark={{
+              color: "emerald.700"
+            }} />
+              <Text style={{color:"green",textAlign:"center"}}>
+                Wallpaper Downloaded Successfully
+              </Text>
+            </HStack>
+            </Box>
+          </Slide>
+
+          {/* Wallpaper Modal */}
+          <Modal
+            isVisible={wallpaperModalVisible}
+            onBackdropPress={() => setWallpaperModalVisible(false)}
+            onBackButtonPress={() => setWallpaperModalVisible(false)}
+            animationIn="bounceInUp"
+            animationOut="bounceOutDown"
+            // animationInTiming={250}
+            // backdropTransitionInTiming={300}
+          >
+              <View style={{backgroundColor:"white",borderRadius:20,width:"70%",marginHorizontal:"12.5%"}}>
+                <Text style={{color:"black",textAlign:"center",fontSize:20}}>Wallpaper Type</Text>
+                  <Divider thickness={2} bg="emerald.500" />
+                  <Radio.Group name="myRadioGroup" accessibilityLabel="favorite number" value={wallpaperType} 
+                    onChange={ nextValue => setWallpaperType(nextValue) }
+                    style={{paddingLeft:"10%"}}
+                  >
+                    <Radio value="FLAG_LOCK" my={1} colorScheme="emerald" style={{paddingVertical:5}}>Lock Screen</Radio>
+                    <Radio value="FLAG_SYSTEM" my={1} colorScheme="emerald" style={{paddingVertical:5}}>Home Screen</Radio>
+                  </Radio.Group>
+                  <TouchableOpacity onPress={() => applyWallpaper(currentItem.url,wallpaperType)}>
+                    <View style={{backgroundColor:"green",borderBottomLeftRadius:20,borderBottomRightRadius:20}}>
+                      <Text style={{color:"black",textAlign:"center",marginVertical:10}}>Apply</Text>
+                    </View>
+                  </TouchableOpacity>
+                  
+              </View>
+          </Modal>
+
+          {/* Loading Modal */}
+          <Modal
+            isVisible={applyClicked}
+            // onBackdropPress={() => setWallpaperModalVisible(false)}
+            // onBackButtonPress={() => setWallpaperModalVisible(false)}
+            animationIn="bounceInUp"
+            animationOut="bounceOutDown"
+          >
+            <View style={{backgroundColor:"white",borderRadius:20,width:"70%",marginHorizontal:"12.5%"}}>
+              <Spinner color="emerald.500" size="lg" />
+              <Text style={{color:"black",textAlign:"center"}}>Loading...</Text>
+            </View>
+
+          </Modal>
       </>
     )
 }
@@ -204,7 +357,53 @@ const styles = StyleSheet.create({
     fontSize:15,
     left:10,
     bottom:8,
-  }
+  },
+  modal:{
+    justifyContent:'flex-end',
+    margin:0,
+  },
+  modalContent:{
+    backgroundColor:"#161616",
+    paddingTop:12,
+    paddingHorizontal:12,
+    borderTopRightRadius:20,
+    borderTopLeftRadius:20,
+    paddingBottom:20,
+  },
+  center:{
+    display:"flex",
+    alignItems:"center",
+    justifyContent:"center",
+  },
+  barIcon:{
+    width:60,
+    height:5,
+    backgroundColor:"#bbb",
+    borderRadius:3,
+  },
+  infoContainer:{
+    marginTop:10
+  },
+  text:{
+    color:"#bbb",
+    fontSize:18,
+    marginBottom:10,
+  },
+  socialMediaHeading:{
+    color:"#bbb",
+    fontSize:18,
+    marginBottom:10,
+    textAlign: 'center',
+  },
+  socialMediaContainer:{
+    // display:"flex",
+    // flexDirection:"row",
+    // justifyContent: 'space-evenly',
+    // backgroundColor:"red",
+    width:"100%",
+    // flex:0,
+  },
+
 });
 
 export default SingleImage
